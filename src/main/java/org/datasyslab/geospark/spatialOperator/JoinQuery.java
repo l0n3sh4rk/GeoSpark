@@ -660,7 +660,7 @@ public class JoinQuery implements Serializable{
     	}
     	List<Tuple2<Envelope,HashSet<Point>>> tupleList = new LinkedList<Tuple2<Envelope,HashSet<Point>>>();
     	for (Envelope queryEnvelope : envelopes) {
-    		JavaRDD<Point> points = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0, true);
+    		JavaRDD<Point> points = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0, useIndex);
     		List<Point> pointList = new LinkedList<Point>(points.collect());
     		HashSet<Point> pointSet = new HashSet<Point>(pointList);
     		tupleList.add(new Tuple2<Envelope,HashSet<Point>>(queryEnvelope,pointSet));
