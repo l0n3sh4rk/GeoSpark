@@ -7,7 +7,9 @@
 package org.datasyslab.geospark.spatialOperator;
 
 import java.io.Serializable;
+import java.util.HashSet;
 
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.datasyslab.geospark.rangeJudgement.GeometryRangeFilter;
@@ -320,3 +322,4 @@ public class RangeQuery implements Serializable{
 		}
 	}
 }
+ 
