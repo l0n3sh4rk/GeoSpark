@@ -653,7 +653,11 @@ public class JoinQuery implements Serializable{
 
     public static JavaPairRDD<Envelope, HashSet<Point>> SpatialJoinQuery(SparkContext sc, PointRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex) throws Exception {
     	JavaSparkContext jsc = new JavaSparkContext(sc);
-    	List<Envelope> envelopes = queryRDD.grids;
+    	List<Object> objs = queryRDD.rawSpatialRDD.collect();
+    	List<Envelope> envelopes = new LinkedList<Envelope>();
+    	for(Object obj : objs){
+    		envelopes.add((Envelope)obj);
+    	}
     	List<Tuple2<Envelope,HashSet<Point>>> tupleList = new LinkedList<Tuple2<Envelope,HashSet<Point>>>();
     	for (Envelope queryEnvelope : envelopes) {
     		JavaRDD<Point> points = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0, true);
