@@ -9,11 +9,15 @@ package org.datasyslab.geospark.spatialOperator;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.rdd.RDD;
 import org.datasyslab.geospark.joinJudgement.GeometryByPolygonJudgement;
 import org.datasyslab.geospark.joinJudgement.GeometryByPolygonJudgementUsingIndex;
 import org.datasyslab.geospark.joinJudgement.GeometryByRectangleJudgement;
@@ -644,5 +648,22 @@ public class JoinQuery implements Serializable{
             });
             return resultCountByKey;
         }
+    }
+
+    public static JavaPairRDD<Envelope, HashSet<Point>> SpatialJoinQuery(SparkContext sc, PointRDD spatialRDD,RectangleRDD queryRDD,boolean useIndex) throws Exception {
+    	HashSet<Envelope> envelopes = new HashSet<Envelope>(queryRDD.rawRectangleRDD.collect());
+    	List<Tuple2<Envelope,HashSet<Point>>> tupleList = new LinkedList<Tuple2<Envelope,HashSet<Point>>>();
+    	for (Envelope queryEnvelope : envelopes) {
+    		JavaRDD<Point> points = RangeQuery.SpatialRangeQuery(spatialRDD, queryEnvelope, 0, true);
+    		List<Point> pointList = new LinkedList<Point>(points.collect());
+    		HashSet<Point> pointSet = new HashSet<Point>();
+    		for(Point point: pointList){
+        		pointSet.add(point);
+        	}
+    		Tuple2<Envelope,HashSet<Point>> tuple = new Tuple2<Envelope,HashSet<Point>>(queryEnvelope,pointSet);
+    		tupleList.add(tuple);
+    	}
+    	JavaPairRDD<Envelope,HashSet<Point>> result = sc.parallelizePairs(tupleList, 10);
+        return result;
     }
 }
